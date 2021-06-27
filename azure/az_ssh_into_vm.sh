@@ -10,20 +10,19 @@ HISTFILE='/home/user/.zsh_history' # History file location to register past conn
 
 # Check for prerequisites
 command -v az >/dev/null 2>&1 || { echo >&2 "I require az but it's not installed.  Aborting."; exit 1; }
-command -v jq >/dev/null 2>&1 || { echo >&2 "I require jq but it's not installed.  Aborting."; exit 1; }
 command -v fzf >/dev/null 2>&1 || { echo >&2 "I require fzf but it's not installed.  Aborting."; exit 1; }
 
 # Interactively choose subscription, resource group and VM
-ACCOUNT=$(az account list | jq -r '.[].name' | fzf)
+ACCOUNT=$(az account list --query '[].name' -o tsv | fzf)
 if [ -z "$ACCOUNT" ]; then exit 1; fi
-RG=$(az group list --subscription "$ACCOUNT" | jq -r '.[].name' | fzf)
+RG=$(az group list --subscription "$ACCOUNT" --query '[].name' -o tsv | fzf)
 if [ -z "$RG" ]; then exit 1; fi
-VM=$(az vm list --subscription "$ACCOUNT" --resource-group "$RG" | jq -r '.[].name' | fzf)
+VM=$(az vm list --subscription "$ACCOUNT" --resource-group "$RG" --query '[].name' -o tsv | fzf)
 if [ -z "$VM" ]; then exit 1; fi
 echo "Retriving VM FQDN ..."
-VM_NIC=$(az vm show --subscription "$ACCOUNT" --resource-group "$RG" --name "$VM" | jq -r '.networkProfile.networkInterfaces[0].id')
-NIC_PIP=$(az network nic show --ids "$VM_NIC" | jq -r '.ipConfigurations[0].publicIpAddress.id')
-PIP_FQDN=$(az network public-ip show --id "$NIC_PIP" | jq -r '.dnsSettings.fqdn')
+VM_NIC=$(az vm show --subscription "$ACCOUNT" --resource-group "$RG" --name "$VM" --query 'networkProfile.networkInterfaces[0].id' -o tsv)
+NIC_PIP=$(az network nic show --ids "$VM_NIC" --query 'ipConfigurations[0].publicIpAddress.id' -o tsv)
+PIP_FQDN=$(az network public-ip show --id "$NIC_PIP" --query 'dnsSettings.fqdn' -o tsv)
 
 read -e -r -p "Want to SSH into it [Y\n]? " RESULT
 RESULT=${RESULT:-Y}
