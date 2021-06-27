@@ -17,11 +17,11 @@ NIC_NSG=$(az network nic show --ids "$VM_NIC" --query 'networkSecurityGroup.id' 
 NSG_NAME=$(az network nsg show --ids "$NIC_NSG" --query 'name' -o tsv)
 
 # Ask for rule values
-read -p "Rule name: " RULE_NAME
-read -p "Port ranges (e.g. 80 or 80-88 or 80,88): " PORT_RANGES
+read -e -r -p "Rule name: " RULE_NAME
+read -e -r -p "Port ranges (e.g. 80 or 80-88 or 80,88): " PORT_RANGES
 printf  "\nCurrent rule and priority:\n"
 az network nsg rule list --subscription "$ACCOUNT" --resource-group "$RG" --nsg-name "$NSG_NAME" --query '[].[priority, name]' -o tsv | sort -h
-read -p "Priority [100-4096]: " PRIORITY
+read -e -r -p "Priority [100-4096]: " PRIORITY
 
 # Appling rule
 printf  "\nAppling rule..."

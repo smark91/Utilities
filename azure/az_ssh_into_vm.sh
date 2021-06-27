@@ -31,7 +31,7 @@ if [ "$RESULT" = "y" ] || [ "$RESULT" = "Y" ]; then
     read -e -r -p "SSH Username [$DEFAULT_USER]: " USER
     USER=${USER:-$DEFAULT_USER}
     set -o history
-    history -s "ssh $USER"@"$PIP_FQDN # Sub: $ACCOUNT | RG: $RG | VM: $VM"
+    history -s "ssh $USER@$PIP_FQDN # Sub: $ACCOUNT | RG: $RG | VM: $VM"
     ssh "$USER@$PIP_FQDN"
 else
     echo "FQDN: $PIP_FQDN"
