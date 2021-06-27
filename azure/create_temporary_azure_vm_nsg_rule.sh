@@ -1,5 +1,9 @@
 #!/bin/bash
 
+###############
+# The script create a temporary rule on a VM firewall using your current public IP than it will wait until a key is pressed to remove it
+###############
+
 # Check for prerequisites
 command -v az >/dev/null 2>&1 || { echo >&2 "I require az but it's not installed.  Aborting."; exit 1; }
 command -v jq >/dev/null 2>&1 || { echo >&2 "I require jq but it's not installed.  Aborting."; exit 1; }
@@ -26,7 +30,7 @@ printf  "\nAppling rule..."
 az network nsg rule create --subscription "$ACCOUNT" -g "$RG" --nsg-name "$NSG_NAME" --name "$RULE_NAME" --source-address-prefixes "$(curl -s ipconfig.io)/32" --destination-port-ranges "$PORT_RANGES" --access Allow --protocol Tcp --priority "$PRIORITY" | jq -r '.provisioningState'
 
 # Wait for ESC input
-printf  "Press ESC key to remove the rule"
+printf  "Press ESC key to remove the rule or CTRL-C to leave it"
 while read -r -n1 key
 do
     if [[ $key == $'\e' ]]; then
